@@ -1,134 +1,98 @@
-// import {data} from "./faq.js"
+import {
+    data
+} from './faq.js'
 
-// let accordion = document.querySelector(".js-wrapper");
-// let answerWrapper;
-// let questions; 
-
-function createNewAccordion(parentEl, accDataFile) {
-    let myObj = new NewAccordion(parentEl, accDataFile);
-    myObj.getData()
-    console.log(myObj);
-    //  myObj.createAccordion();
-    // console.log(myObj.data);
-}
-
-// const newData = {
-//     components:[
-//         {
-//             name: "accordion",
-//             items:[
-//                 {
-//                     title: "title",
-//                     content: "asd"
-//                 }
-//             ]
-//         },
-//         {
-//             name: "slider"
-//         }
-//     ]
-// }
-
-class NewAccordion {
-    constructor(parentEl, accDataFile) {
+class Component {
+    constructor(parentEl, data) {
         this.parentEl = parentEl;
-        this.accDataFile = accDataFile;
-       
-        this.createAccordion = function (data) {
-            let ctx = document.createElement("section");
-            ctx.classList.add("accordion");
-            let answerWrapper;
-            let questions; 
-            // let accordion = document.querySelector(`.${this.parentEl}`);
-            console.log(data);
-            data.items.forEach((el) => {
-                let newItem = document.createElement("article");
-                newItem.classList.add("accordion__item");
-                let newItemContent = `
-                    <button class="accordion__q js-q">${el.title}</button>
-                    <div class="accordion__a-wrapper js-a-wrap">
-                        <p class="accordion__a js-a">${el.content}</p>
-                    </div>`
-                newItem.innerHTML = newItemContent;
-                ctx.appendChild(newItem);
-                document.querySelector(parentEl).appendChild(ctx);
-            })
-            questions = ctx.querySelectorAll(".js-q");
-            answerWrapper = ctx.querySelectorAll(".js-a-wrap");
-            questions.forEach((el) => {
-                el.addEventListener("click", expandAnswer)
-            });
-        }
-
-
-        // createHTML
-        this.getData = function () {
-            let newData = import(`${this.accDataFile}`)
-                .then((module) => { 
-                    this.createAccordion(module.data); 
-                })
-            return newData;
-        }
-
-        // this.data = this.getData();
-        // this.createAccordion = function () {
-        //     console.log(this.parentEl);
-        // }
-        console.log(this);
-        console.log(this.data);
+        this.data = data;
     }
+    init() {
+        this.selectors = {
+            ctx: [".accordion", ".js-wrapper"],
+            accordion_item: ".accordion__item",
+            button: ".js-q",
+            content_wrap: ".js-a-wrap",
+            content: ".js-a"
+        }
+        this.dynamicClasses = {
+            ctx: ["accordion", "js-wrapper"],
+            accordion_item: "accordion__item",
+            button: "js-q",
+            content_wrap: "js-a-wrap",
+            content: "js-a"
+        }
+        // this.stateClasses = {
+        //     buttonActive: "accordion__btn--active"
+        // }
+        this.ctx = this.createCtx();
+        this.content = this.createContent();
+        this.getElements = this.getElementsSetClicks();
+    }
+    createCtx() {
+        let ctx = document.createElement("section");
+        ctx.classList.add(...this.dynamicClasses.ctx);
+        document.querySelector(this.parentEl).appendChild(ctx);
+        return ctx;
+    }
+    createContent() {
+        this.data.items.forEach((el) => {
+            let newItem = document.createElement("article");
+            newItem.classList.add(this.dynamicClasses.accordion_item);
+            let newItemContent = `
+                <button class="accordion__q js-q">${el.title}</button>
+                <div class="accordion__a-wrapper js-a-wrap">
+                    <p class="accordion__a js-a">${el.content}</p>
+                </div>`
+            newItem.innerHTML = newItemContent;
+            this.ctx.appendChild(newItem);
+        }) 
+    }
+    getElementsSetClicks() {
+        this.question = this.ctx.querySelectorAll(this.selectors.button); 
+        this.contentWrapper = this.ctx.querySelectorAll(this.selectors.content_wrap);
+        this.question.forEach((el) => {
+            el.addEventListener("click", this.handleClick.bind(this))
+        });
+    }
+   
+    handleClick(el) { 
+        let clicked = el.target;//bolje button
+        let answerWrap = clicked.closest(this.selectors.accordion_item).querySelector(this.selectors.content_wrap);
+        let answClasses = answerWrap.classList;  
+        
+        if(answClasses.contains("active")){
+            clicked.classList.remove('active');
+            answClasses.remove('active'); 
+            answerWrap.style.height = 0;
+        }else{ 
+            this.contentWrapper.forEach((el) => {
+                let currentWrap = el.closest(this.selectors.accordion_item).querySelector(this.selectors.button);
+                currentWrap.classList.remove("active");
+                el.classList.remove("active");
+                el.style.height = 0;
+            });
+            let answerHeight = this.getAnswerHeight(clicked) + "px";
+            answClasses.add('active');
+            clicked.classList.add('active');
+            answerWrap.style.height = answerHeight;
+        }
+    }
+    getAnswerHeight(el){  
+        let answerHeight = el.closest(this.selectors.accordion_item);
+        answerHeight = answerHeight.querySelector(this.selectors.content).offsetHeight;
+        return answerHeight;
+    }
+    
+
 }
 
-// function createAccordion() {
-//     document.querySelector('.js-main-title').innerHTML = data.main_title;
-//     data.items.forEach((el) => {
-//         let newItem = document.createElement("article");
-//         newItem.classList.add("accordion__item");
-//         let newItemContent = `
-//             <button class="accordion__q js-q">${el.title}</button>
-//             <div class="accordion__a-wrapper js-a-wrap">
-//                 <p class="accordion__a js-a">${el.content}</p>
-//             </div>`
-//         newItem.innerHTML = newItemContent;
-//         accordion.appendChild(newItem);
-//     })
-//     questions = document.querySelectorAll(".js-q");
-//     answerWrapper = document.querySelectorAll(".js-a-wrap");
-//     questions.forEach((el) => {
-//         el.addEventListener("click", expandAnswer)
-//     });
-// }
 
+function createComponent() {
+    const Accordion = new Component('.main', data);
+    Accordion.init();
+}
 
-// function expandAnswer(el){ 
-//     let answerHeight = getAnswerHeight(this) + "px";  
-//     let answClasses = this.nextElementSibling.classList; 
-
-//     if(answClasses.contains("active")){
-//         el.target.classList.remove('active');
-//         answClasses.remove('active');
-//         this.nextElementSibling.style.height = 0;
-//     }else{
-//         answerWrapper.forEach((el) => {
-//             el.classList.remove("active");
-//             el.previousElementSibling.classList.remove("active");
-//             el.style.height = 0;
-//         });
-//         answClasses.add('active');
-//         el.target.classList.add('active');
-//         this.nextElementSibling.style.height = answerHeight;
-//     }
-// }
-
-
-// function getAnswerHeight(el){
-//     let answerHeight = el.nextElementSibling.querySelector('.js-a').offsetHeight;
-//     return answerHeight;
-// }
-
-
-createNewAccordion(".main", "./faq.js");
-createNewAccordion(".main", "./faq.js");
-// createNewAccordion("accordion2", "./faq.js");
-// printData("./faq.js");  
-//  console.log(printData("./faq.js"));
+createComponent();
+createComponent();
+createComponent();
