@@ -1,7 +1,9 @@
  
 
-class AccordionFunction {
-    
+class Accordion {
+    constructor(accordion){
+        this.ctx = accordion;
+    }
     init() {
         this.selectors = {
             ctx: ".js-wrapper",
@@ -11,8 +13,7 @@ class AccordionFunction {
             content: ".js-answer"
         }
        
-        this.ctx = document.querySelector(this.selectors.ctx);
-        console.log(this.ctx);
+        // this.ctx = document.querySelector(this.selectors.ctx);
         this.questions = this.ctx.querySelectorAll(this.selectors.button);
         this.contentWrapper = this.ctx.querySelectorAll(this.selectors.content_wrap);
         
@@ -70,8 +71,14 @@ class AccordionFunction {
 }
 
 
-function letsAccordion() {   
-        const Accordion = new AccordionFunction(); 
-        Accordion.init(); 
+function createAccordion() {
+    let accordions = document.querySelectorAll("[data-component='Accordion']");
+    accordions.forEach(el=>{
+        const Accord = new Accordion(el); 
+        Accord.init(); 
+    })  
 }
-window.addEventListener('DOMContentLoaded', letsAccordion); 
+
+createAccordion(); 
+// https://github.com/AbrakaDaba/accordion/tree/html_ready
+// https://abrakadaba.github.io/accordion/
