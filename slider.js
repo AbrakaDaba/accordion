@@ -1,10 +1,6 @@
 class Slider {
     constructor(slider) {
-        this.ctx = slider; 
-        // this.infinite = data.infinite;
-        // this.autoplay = data.autoplay;
-        // this.interval = data.interval
-        // this.animationType = data.animationType;
+        this.ctx = slider;  
     }
     init() {
  
@@ -39,8 +35,7 @@ class Slider {
         // this.checkAutoplay(); 
         this.checkInfiniteStatus();
         
-        this.leftArrowBtn.onclick = this.slideLeft.bind(this);
-        this.rightArrowBtn.onclick = this.slideRight.bind(this);
+        
         window.addEventListener('resize', this.handleWindowResize.bind(this))
     }
     startPosition(){
@@ -52,9 +47,13 @@ class Slider {
     }
     checkAnimationType() {
         if(this.attr.animationType == "slide"){
+            this.leftArrowBtn.onclick = this.slideLeft.bind(this);
+            this.rightArrowBtn.onclick = this.slideRight.bind(this);
             this.checkAutoplay();  
         }else if(this.attr.animationType == "fade"){
-             this.checkAutoplay();  
+            this.leftArrowBtn.onclick = this.fadeForward.bind(this);
+            this.rightArrowBtn.onclick = this.fadeBack.bind(this);
+            this.checkAutoplay();  
             this.fadingSlides();
          }else{
             
@@ -81,30 +80,40 @@ class Slider {
     }
     checkAutoplay() { 
         if (this.attr.autoplay == "true" && this.attr.animationType == "slide") {
-           
-            this.sliderInterval = setInterval(this.autoPlay.bind(this), this.attr.interval);
+            this.sliderInterval = setInterval(this.autoSlide.bind(this), this.attr.interval);
         }else if(this.attr.autoplay == "true" && this.attr.animationType == "fade"){
-            console.log("fade");
+            this.sliderWrapp.classList.add("js-fade")
+            this.fadeInterval = setInterval(this.autoFade.bind(this), this.attr.interval);
         }else{ 
+            return;
         }
     }
-    autoPlay() {
-        console.log(this.position, this.slidesNum);
+    autoSlide() { 
         if (this.position !== this.slidesNum) {
             let index = this.checkPositionStatus(++this.position);
             this.slideToSlide(index); 
-        } else{
-            if(this.attr.infinite == "true"){ 
+        } else {
+            if (this.attr.infinite == "true"){ 
                 this.position = 1; 
                 this.slideToSlide(this.position); 
-
-            }else{ 
+            } else { 
                 clearInterval(this.sliderInterval);
-            }
-             
+            }             
         }
     }
 
+    autoFade(){
+        console.log("fade");
+    }
+    fadeForward(){
+
+    }
+    fadeBack(){
+
+    }
+    fadingSlides(){
+
+    }
     disableRightArrow() {
         this.rightArrowBtn.classList.add(this.selectors.arrowDisabled) 
     }
@@ -119,35 +128,31 @@ class Slider {
         let currentWidth = this.ctx.querySelector(this.selectors.slide).offsetWidth;
         this.currentWidth = currentWidth;
     }
-    fadingSlides(){
-
-    }
     slideLeft() {
-        if(this.attr.autoplay == "true"){
-            let index = this.checkPositionStatus(--this.position);
-            this.slideToSlide(index);
-            clearInterval(this.sliderInterval);
-            this.attr.autoplay = "false";
-        }else{
-            let index = this.checkPositionStatus(--this.position);
-            this.slideToSlide(index);
-        }
+        let index = this.checkPositionStatus(--this.position);
+        this.slideToSlide(index);
+        (this.attr.autoplay == "true") ? this.stopAutoPlay() : "";
     }
     slideRight() { 
-        if(this.attr.autoplay == "true"){
-            let index = this.checkPositionStatus(++this.position);
-            this.slideToSlide(index);
-            clearInterval(this.sliderInterval);
-            this.attr.autoplay = "false";
-        }else{
-            let index = this.checkPositionStatus(++this.position);
-            this.slideToSlide(index);
-        }
+        let index = this.checkPositionStatus(++this.position);
+        this.slideToSlide(index);
+        (this.attr.autoplay == "true") ? this.stopAutoPlay() : "";
+         
     }
     slideToSlide(index) {
         this.getCurrentWidth();
         let route = this.currentWidth * (index - 1);
-        this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
+        if(this.attr.animationType == "fade"){
+            this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
+
+        }else if(this.attr.animationType == "slide"){
+            this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
+        }
+    }
+    stopAutoPlay(){
+        clearInterval(this.sliderInterval);
+        clearInterval(this.fadeInterval);
+        this.attr.autoplay = "false";
     }
 }
 
