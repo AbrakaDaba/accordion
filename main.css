@@ -8,13 +8,8 @@
 body {
   margin: 0;
   padding: 0;
-  width: 100vw;
   height: 100vh;
   background: #8bbece;
-}
-
-main {
-  margin: 0;
 }
 
 h1 {
@@ -122,7 +117,6 @@ h1 {
 }
 
 body {
-  width: 100vw;
   height: 100vh;
   background: #cfcfcf;
 }
@@ -135,14 +129,13 @@ body {
   max-width: 1200px;
   height: 600px;
   overflow: hidden;
-  margin: 0 auto;
-  margin-bottom: 50px;
+  margin: 0 auto 50px auto;
 }
 .slider__wrapper {
   display: flex;
   width: auto;
   height: 100%;
-  transition: transform 0.2s ease;
+  transition: transform 0.6s ease-in-out;
 }
 .slider__title {
   letter-spacing: 3px;

@@ -3,6 +3,7 @@ class Accordion {
         this.ctx = accordion;
     }
     init() {
+
         this.selectors = {
             ctx: ".js-wrapper",
             accordion_item: ".accordion__item",
@@ -10,8 +11,7 @@ class Accordion {
             content_wrap: ".js-a-wrap",
             content: ".js-answer"
         }
-       
-        // this.ctx = document.querySelector(this.selectors.ctx);
+        
         this.questions = this.ctx.querySelectorAll(this.selectors.button);
         this.contentWrapper = this.ctx.querySelectorAll(this.selectors.content_wrap);
         

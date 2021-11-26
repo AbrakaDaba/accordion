@@ -7,6 +7,13 @@ class Slider {
         // this.animationType = data.animationType;
     }
     init() {
+ 
+        this.attr = { 
+            autoplay: this.ctx.getAttribute("data-autoplay") ? this.ctx.getAttribute("data-autoplay") : false,
+            interval: this.ctx.getAttribute("data-interval") ? parseInt(this.ctx.getAttribute("data-interval")) : 4000,
+            infinite: this.ctx.getAttribute("data-infinite") ? this.ctx.getAttribute("data-infinite") : false,
+            animationType: this.ctx.getAttribute("data-animation-type") ? this.ctx.getAttribute("data-animation-type") : "slide"
+        }
 
         this.selectors = {
             ctx: ".js-slider",
@@ -26,23 +33,37 @@ class Slider {
         this.sliderWrapp = this.ctx.querySelector(this.selectors.sliderWrapp);
         this.currentWidth = this.getCurrentWidth();
         this.position = 1; //first slide in the viewport
-        this.slideToSlide(this.position);
-        this.checkInfiniteStatus();
-        this.checkAutoplay();
-        this.checkAnimationType();
+        this.startPosition();
         this.checkPositionStatus();
+        this.checkAnimationType();
+        // this.checkAutoplay(); 
+        this.checkInfiniteStatus();
+        
         this.leftArrowBtn.onclick = this.slideLeft.bind(this);
         this.rightArrowBtn.onclick = this.slideRight.bind(this);
         window.addEventListener('resize', this.handleWindowResize.bind(this))
     }
-
+    startPosition(){
+        this.slideToSlide(this.position)
+    }
     handleWindowResize() {
         this.getCurrentWidth();
         this.slideToSlide(this.position);
     }
-    checkInfiniteStatus() { 
+    checkAnimationType() {
+        if(this.attr.animationType == "slide"){
+            this.checkAutoplay();  
+        }else if(this.attr.animationType == "fade"){
+             this.checkAutoplay();  
+            this.fadingSlides();
+         }else{
+            
+         }
     }
-    checkPositionStatus(index = 1) {  
+    checkInfiniteStatus() { 
+
+    }
+    checkPositionStatus(index = 1) { 
         if(index == this.slidesNum){
             index = this.slidesNum
             this.position = index;
@@ -58,26 +79,32 @@ class Slider {
             return index;
         } 
     }
-    checkAutoplay() {
-        if (this.autoplay == true) {
-            this.sliderInterval = setInterval(this.autoPlay.bind(this), this.interval);
+    checkAutoplay() { 
+        if (this.attr.autoplay == "true" && this.attr.animationType == "slide") {
+           
+            this.sliderInterval = setInterval(this.autoPlay.bind(this), this.attr.interval);
+        }else if(this.attr.autoplay == "true" && this.attr.animationType == "fade"){
+            console.log("fade");
+        }else{ 
         }
     }
     autoPlay() {
-        if (this.position !== this.ctx.querySelectorAll(this.selectors.slide).length) {
-            this.slideRight();
-            console.log("slidiiiing");
-        } else {
-            this.position = 0;
-            this.slideRight();
-            // clearInterval(this.sliderInterval);
-            
-            console.log("stopSliddiiiing");
+        console.log(this.position, this.slidesNum);
+        if (this.position !== this.slidesNum) {
+            let index = this.checkPositionStatus(++this.position);
+            this.slideToSlide(index); 
+        } else{
+            if(this.attr.infinite == "true"){ 
+                this.position = 1; 
+                this.slideToSlide(this.position); 
+
+            }else{ 
+                clearInterval(this.sliderInterval);
+            }
+             
         }
     }
-    checkAnimationType() {
 
-    }
     disableRightArrow() {
         this.rightArrowBtn.classList.add(this.selectors.arrowDisabled) 
     }
@@ -92,14 +119,30 @@ class Slider {
         let currentWidth = this.ctx.querySelector(this.selectors.slide).offsetWidth;
         this.currentWidth = currentWidth;
     }
+    fadingSlides(){
 
-    slideLeft() { 
-        let index = this.checkPositionStatus(--this.position);
-        this.slideToSlide(index);
+    }
+    slideLeft() {
+        if(this.attr.autoplay == "true"){
+            let index = this.checkPositionStatus(--this.position);
+            this.slideToSlide(index);
+            clearInterval(this.sliderInterval);
+            this.attr.autoplay = "false";
+        }else{
+            let index = this.checkPositionStatus(--this.position);
+            this.slideToSlide(index);
+        }
     }
     slideRight() { 
-        let index = this.checkPositionStatus(++this.position);
-        this.slideToSlide(index);
+        if(this.attr.autoplay == "true"){
+            let index = this.checkPositionStatus(++this.position);
+            this.slideToSlide(index);
+            clearInterval(this.sliderInterval);
+            this.attr.autoplay = "false";
+        }else{
+            let index = this.checkPositionStatus(++this.position);
+            this.slideToSlide(index);
+        }
     }
     slideToSlide(index) {
         this.getCurrentWidth();
