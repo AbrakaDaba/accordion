@@ -15,8 +15,8 @@ body {
 h1 {
   color: #4f5768;
   text-align: center;
-  font-size: 60px;
-  line-height: 2.5;
+  font-size: calc(10px + 5vw);
+  line-height: 1.5;
   letter-spacing: 15px;
   text-shadow: 0px 0px 40px white;
 }
@@ -148,6 +148,8 @@ body {
   height: 100%;
   top: 0;
   left: 0;
+  background-repeat: no-repeat;
+  background-position: center;
   transition: opacity 1.5s ease;
 }
 .slider__wrapper--fade .slider__item.active, .slider__wrapper--fade .slider__item:first-of-type {
@@ -159,13 +161,14 @@ body {
   z-index: 0;
 }
 .slider__title {
+  max-width: calc(100% - 40px);
   letter-spacing: 3px;
-  font-size: 65px;
+  font-size: calc(45px + 2.5vw);
   color: #ffda08;
   text-shadow: 0 0 10px #3f3f3f;
 }
 .slider__button {
-  padding: 12px 60px;
+  padding: calc(5px + 0.5vw) calc(10px + 3vw);
   background-color: rgba(0, 0, 0, 0.65);
   border: 1px solid white;
   color: white;
@@ -184,9 +187,9 @@ body {
   color: white;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: flex-start;
-  padding-left: 5%;
+  padding: 70px 10%;
 }
 .slider__arrow {
   font-family: fangsong;

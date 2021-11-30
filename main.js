@@ -29,6 +29,5 @@ const components = {
 
  
 
-
- // https://github.com/AbrakaDaba/accordion/tree/html_ready
  // https://abrakadaba.github.io/accordion/
+ // https://github.com/AbrakaDaba/accordion
