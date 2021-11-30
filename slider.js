@@ -1,16 +1,20 @@
+// First we run checkPositionStatus(), then changeToSlide()
+
 class Slider {
     constructor(slider) {
         this.ctx = slider;  
     }
     init() {
  
-        this.attr = { 
+        this.params = {  
             autoplay: this.ctx.getAttribute("data-autoplay") ? this.ctx.getAttribute("data-autoplay") : false,
             interval: this.ctx.getAttribute("data-interval") ? parseInt(this.ctx.getAttribute("data-interval")) : 4000,
             infinite: this.ctx.getAttribute("data-infinite") ? this.ctx.getAttribute("data-infinite") : false,
-            animationType: this.ctx.getAttribute("data-animation-type") ? this.ctx.getAttribute("data-animation-type") : "slide"
+            animationType: this.ctx.getAttribute("data-animation-type") ? this.ctx.getAttribute("data-animation-type") : "slide",
+            bullets: this.ctx.getAttribute("data-bullets") ? this.ctx.getAttribute("data-bullets") : "false",
         }
 
+        //selectors
         this.selectors = {
             ctx: ".js-slider",
             sliderWrapp: ".js-slider__wrapper",
@@ -19,140 +23,201 @@ class Slider {
             button: ".js-slider__btn",
             rightArrow: ".js-arrow-right",
             leftArrow: ".js-arrow-left",
-            arrowDisabled: "slider__arrow--disabled"
+            bullets: ".slider__bullet"
         }
- 
-   
+
+        // dynamic classes
+        this.dynamicClasses = {
+            bulletBox: "slider__bulletBox",
+            bullet: "slider__bullet"
+        }
+
+        //  state classes
+        this.stateClasses = {
+            arrowDisabled: "slider__arrow--disabled",
+            fade: "slider__wrapper--fade",
+            currentBullet: "slider__bullet--active"
+        }
+
+        // variables(elements, width & position)
         this.leftArrowBtn = this.ctx.querySelector(this.selectors.leftArrow);
         this.rightArrowBtn = this.ctx.querySelector(this.selectors.rightArrow);
+        this.slides = Array.from(this.ctx.querySelectorAll(this.selectors.slide));
         this.slidesNum = this.ctx.querySelectorAll(this.selectors.slide).length;
         this.sliderWrapp = this.ctx.querySelector(this.selectors.sliderWrapp);
-        this.currentWidth = this.getCurrentWidth();
+        this.bullets;
+        this.currentWidth = this.getCurrentWidth(); 
         this.position = 1; //first slide in the viewport
+
+        // init slider      
+        this.setAnimation();
+        this.checkPositionStatus(); // handling buttons regarding position status
         this.startPosition();
-        this.checkPositionStatus();
-        this.checkAnimationType();
-        // this.checkAutoplay(); 
-        this.checkInfiniteStatus();
-        
-        
-        window.addEventListener('resize', this.handleWindowResize.bind(this))
+        this.checkAutoplay();
+        this.setBullets();  
+
+        // event listeners
+        window.addEventListener('resize', this.handleWindowResize.bind(this));
+        this.ctx.onmouseenter = this.stopAutoPlay.bind(this);
+        this.ctx.onmouseleave = this.checkAutoplay.bind(this);
+        this.leftArrowBtn.onclick = this.slidePrev.bind(this);
+        this.rightArrowBtn.onclick = this.slideNext.bind(this);
     }
     startPosition(){
-        this.slideToSlide(this.position)
+        this.changeToSlide(this.position)
     }
     handleWindowResize() {
         this.getCurrentWidth();
-        this.slideToSlide(this.position);
+        this.changeToSlide(this.position);
     }
-    checkAnimationType() {
-        if(this.attr.animationType == "slide"){
-            this.leftArrowBtn.onclick = this.slideLeft.bind(this);
-            this.rightArrowBtn.onclick = this.slideRight.bind(this);
-            this.checkAutoplay();  
-        }else if(this.attr.animationType == "fade"){
-            this.leftArrowBtn.onclick = this.fadeForward.bind(this);
-            this.rightArrowBtn.onclick = this.fadeBack.bind(this);
-            this.checkAutoplay();  
-            this.fadingSlides();
+    setAnimation() {
+        if(this.params.animationType == "slide"){ 
+            this.sliderWrapp.classList.remove(this.stateClasses.fade);
+        }else if(this.params.animationType == "fade"){ 
+            this.sliderWrapp.classList.add(this.stateClasses.fade);
+            this.slides.forEach(element => { 
+                element.classList.add("inactive")
+            }); 
+            let route = 0;
+            this.sliderWrapp.style.transform = "translateX(-" + route + "px)";  
          }else{
-            
+            console.warn("this Animation type is unknown! Deafult Animation type is 'slide'")
+            this.params.animationType == "slide";
          }
+    }
+    setBullets(){
+        if (this.params.bullets == "true"){
+            const bulletBox = document.createElement("div");
+            bulletBox.classList.add(this.dynamicClasses.bulletBox);
+            bulletBox.style.width = 30 * this.slidesNum + 'px';
+            this.slides.forEach((el, index) => {
+                const bullet = document.createElement("span");
+                bullet.classList.add(this.dynamicClasses.bullet);
+                bullet.addEventListener("click", this.chooseSlide.bind(this, index))
+                bulletBox.append(bullet)
+            })
+            this.ctx.append(bulletBox);
+            this.bullets = this.ctx.querySelectorAll(this.selectors.bullets)
+        }
+    }
+
+    chooseSlide(index, el){ 
+        this.position = index+1;
+        this.changeToSlide(this.position);
+        this.markBullet(el.target);
+        
+    }
+    markBullet(el){
+        this.bullets.forEach((element) => { 
+            element.classList.remove(this.stateClasses.currentBullet)
+        });
+        el.classList.add(this.stateClasses.currentBullet)
     }
     checkInfiniteStatus() { 
 
     }
-    checkPositionStatus(index = 1) { 
+    checkPositionStatus(index = 1) {
         if(index == this.slidesNum){
             index = this.slidesNum
             this.position = index;
-            this.disableRightArrow();
+            if(this.params.infinite !== "true"){
+                this.disableRightArrow();
+            }
             return index;
         }else if(index == 1){
             index = 1;
             this.position = index;
-            this.disableLeftArrow();
+            if(this.params.infinite !== "true"){
+                this.disableLeftArrow();
+            }
             return index;
-        }else{
+        } else {
             this.enableBothArrows();
             return index;
         } 
     }
+
     checkAutoplay() { 
-        if (this.attr.autoplay == "true" && this.attr.animationType == "slide") {
-            this.sliderInterval = setInterval(this.autoSlide.bind(this), this.attr.interval);
-        }else if(this.attr.autoplay == "true" && this.attr.animationType == "fade"){
-            this.sliderWrapp.classList.add("js-fade")
-            this.fadeInterval = setInterval(this.autoFade.bind(this), this.attr.interval);
-        }else{ 
-            return;
-        }
+        (this.params.autoplay == "true") ? this.sliderInterval = setInterval(this.autoPlay.bind(this, this.params.animationType), this.params.interval): "";
+        
     }
-    autoSlide() { 
+    autoPlay(type) { 
+        let index;
         if (this.position !== this.slidesNum) {
-            let index = this.checkPositionStatus(++this.position);
-            this.slideToSlide(index); 
+            index = this.checkPositionStatus(++this.position); 
+            this.changeToSlide(index);          
         } else {
-            if (this.attr.infinite == "true"){ 
-                this.position = 1; 
-                this.slideToSlide(this.position); 
+            if (this.params.infinite == "true"){ 
+                 this.setInfiniteSliding(index);
             } else { 
-                clearInterval(this.sliderInterval);
+                this.stopAutoPlay();
             }             
         }
     }
-
-    autoFade(){
-        console.log("fade");
+    setInfiniteSliding(index){
+        this.enableBothArrows();
+        this.position = 1; 
+        index = this.position;
+        this.changeToSlide(index)
     }
-    fadeForward(){
-
-    }
-    fadeBack(){
-
-    }
-    fadingSlides(){
-
-    }
+ 
     disableRightArrow() {
-        this.rightArrowBtn.classList.add(this.selectors.arrowDisabled) 
+        this.rightArrowBtn.classList.add(this.stateClasses.arrowDisabled);
     }
     disableLeftArrow() {
-        this.leftArrowBtn.classList.add(this.selectors.arrowDisabled) 
+        this.leftArrowBtn.classList.add(this.stateClasses.arrowDisabled);
     }
     enableBothArrows() {
-        this.rightArrowBtn.classList.remove(this.selectors.arrowDisabled); 
-        this.leftArrowBtn.classList.remove(this.selectors.arrowDisabled); 
+        this.rightArrowBtn.classList.remove(this.stateClasses.arrowDisabled); 
+        this.leftArrowBtn.classList.remove(this.stateClasses.arrowDisabled); 
     }
     getCurrentWidth() {
         let currentWidth = this.ctx.querySelector(this.selectors.slide).offsetWidth;
-        this.currentWidth = currentWidth;
+        return currentWidth;
     }
-    slideLeft() {
-        let index = this.checkPositionStatus(--this.position);
-        this.slideToSlide(index);
-        (this.attr.autoplay == "true") ? this.stopAutoPlay() : "";
-    }
-    slideRight() { 
-        let index = this.checkPositionStatus(++this.position);
-        this.slideToSlide(index);
-        (this.attr.autoplay == "true") ? this.stopAutoPlay() : "";
-         
-    }
-    slideToSlide(index) {
-        this.getCurrentWidth();
-        let route = this.currentWidth * (index - 1);
-        if(this.attr.animationType == "fade"){
-            this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
-
-        }else if(this.attr.animationType == "slide"){
-            this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
+    slidePrev() {
+        if (this.params.infinite == "true" && this.position == 1){ 
+            this.position = this.slidesNum;
+            let index = this.position; 
+            this.changeToSlide(index)
+        }else{
+            let index = this.checkPositionStatus(--this.position);
+            this.changeToSlide(index);
+            (this.params.autoplay == "true") ? this.stopAutoPlay() : "";
         }
+        this.markBullet(this.bullets[this.position-1]);
+    }
+    slideNext() {
+        if (this.params.infinite == "true" && this.position == this.slidesNum){ 
+            this.setInfiniteSliding()
+        }else{
+            let index = this.checkPositionStatus(++this.position);
+            this.changeToSlide(index);
+            (this.params.autoplay == "true") ? this.stopAutoPlay() : "";
+        }
+        this.markBullet(this.bullets[this.position-1]);
+    }
+    changeToSlide(index) { //changeToSLide, slide.., fade...
+        if(this.params.animationType == "slide"){
+            this.slideToSlide(index);
+        }else if(this.params.animationType == "fade"){
+           
+            this.fadeToSlide(index-1);
+        }
+    }
+    slideToSlide(index){
+        let route = this.currentWidth * (index-1);
+            this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
+    }
+    fadeToSlide(index){ 
+        this.slides.forEach(element => { 
+            element.classList.add("inactive")
+        });
+        this.slides[index].classList.add("active");
+        this.slides[index].classList.remove("inactive");
     }
     stopAutoPlay(){
         clearInterval(this.sliderInterval);
-        clearInterval(this.fadeInterval);
-        this.attr.autoplay = "false";
     }
 }
 

@@ -137,20 +137,26 @@ body {
   height: 100%;
   transition: transform 0.6s ease-in-out;
 }
-.slider__wrapper.js-fade {
+.slider__wrapper--fade {
   position: relative;
   display: block;
   width: 100%;
 }
-.slider__wrapper.js-fade .slider__item {
+.slider__wrapper--fade .slider__item {
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
+  transition: opacity 1.5s ease;
 }
-.slider__wrapper.js-fade .slider__item.active, .slider__wrapper.js-fade .slider__item:first-of-type {
-  z-index: 100;
+.slider__wrapper--fade .slider__item.active, .slider__wrapper--fade .slider__item:first-of-type {
+  opacity: 1;
+  z-index: 2;
+}
+.slider__wrapper--fade .slider__item.inactive {
+  opacity: 0;
+  z-index: 0;
 }
 .slider__title {
   letter-spacing: 3px;
@@ -222,6 +228,32 @@ body {
   right: 0;
   left: auto;
   transform: translate(0, -50%);
+}
+.slider__bulletBox {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  display: flex;
+  height: 20px;
+  justify-content: space-between;
+}
+.slider__bullet {
+  appearance: button;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.295);
+  border: 2px solid #b3b1b1;
+  transition: all 0.2s ease;
+}
+.slider__bullet:hover {
+  border-color: #ffffff;
+}
+.slider__bullet--active {
+  border: 2px solid cfff;
+  background: #ffffff;
 }
 
 /*# sourceMappingURL=main.css.map */
