@@ -1,4 +1,5 @@
-// First we run checkPositionStatus(), then changeToSlide()
+// First we run checkPositionStatus(), 
+// then changeToSlide()
 
 class Slider {
     constructor(slider) {
@@ -52,9 +53,9 @@ class Slider {
         // init slider      
         this.setAnimation();
         this.checkPositionStatus(); // handling buttons regarding position status
+        this.setBullets();  
         this.startPosition();
         this.checkAutoplay();
-        this.setBullets();  
 
         // event listeners
         window.addEventListener('resize', this.handleWindowResize.bind(this));
@@ -63,13 +64,16 @@ class Slider {
         this.leftArrowBtn.onclick = this.slidePrev.bind(this);
         this.rightArrowBtn.onclick = this.slideNext.bind(this);
     }
+
     startPosition(){
         this.changeToSlide(this.position)
     }
+
     handleWindowResize() {
         this.getCurrentWidth();
         this.changeToSlide(this.position);
     }
+
     setAnimation() {
         if(this.params.animationType == "slide"){ 
             this.sliderWrapp.classList.remove(this.stateClasses.fade);
@@ -85,6 +89,7 @@ class Slider {
             this.params.animationType == "slide";
          }
     }
+
     setBullets(){
         if (this.params.bullets == "true"){
             const bulletBox = document.createElement("div");
@@ -107,15 +112,14 @@ class Slider {
         this.markBullet(el.target);
         
     }
+
     markBullet(el){
         this.bullets.forEach((element) => { 
             element.classList.remove(this.stateClasses.currentBullet)
         });
         el.classList.add(this.stateClasses.currentBullet)
     }
-    checkInfiniteStatus() { 
-
-    }
+ 
     checkPositionStatus(index = 1) {
         if(index == this.slidesNum){
             index = this.slidesNum
@@ -164,17 +168,21 @@ class Slider {
     disableRightArrow() {
         this.rightArrowBtn.classList.add(this.stateClasses.arrowDisabled);
     }
+
     disableLeftArrow() {
         this.leftArrowBtn.classList.add(this.stateClasses.arrowDisabled);
     }
+
     enableBothArrows() {
         this.rightArrowBtn.classList.remove(this.stateClasses.arrowDisabled); 
         this.leftArrowBtn.classList.remove(this.stateClasses.arrowDisabled); 
     }
+
     getCurrentWidth() {
         let currentWidth = this.ctx.querySelector(this.selectors.slide).offsetWidth;
         return currentWidth;
     }
+
     slidePrev() {
         if (this.params.infinite == "true" && this.position == 1){ 
             this.position = this.slidesNum;
@@ -187,6 +195,7 @@ class Slider {
         }
         this.markBullet(this.bullets[this.position-1]);
     }
+
     slideNext() {
         if (this.params.infinite == "true" && this.position == this.slidesNum){ 
             this.setInfiniteSliding()
@@ -194,21 +203,24 @@ class Slider {
             let index = this.checkPositionStatus(++this.position);
             this.changeToSlide(index);
             (this.params.autoplay == "true") ? this.stopAutoPlay() : "";
-        }
-        this.markBullet(this.bullets[this.position-1]);
+        } 
     }
-    changeToSlide(index) { //changeToSLide, slide.., fade...
+
+    changeToSlide(index) {
         if(this.params.animationType == "slide"){
             this.slideToSlide(index);
         }else if(this.params.animationType == "fade"){
            
             this.fadeToSlide(index-1);
         }
+        this.markBullet(this.bullets[this.position-1]);
     }
+
     slideToSlide(index){
         let route = this.currentWidth * (index-1);
             this.sliderWrapp.style.transform = "translateX(-" + route + "px)";
     }
+
     fadeToSlide(index){ 
         this.slides.forEach(element => { 
             element.classList.add("inactive")
@@ -216,6 +228,7 @@ class Slider {
         this.slides[index].classList.add("active");
         this.slides[index].classList.remove("inactive");
     }
+
     stopAutoPlay(){
         clearInterval(this.sliderInterval);
     }

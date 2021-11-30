@@ -27,23 +27,7 @@ const components = {
 
  createComponents()
 
-
- // function createComponents(){
- //     let components = document.querySelectorAll("[data-component]");
- //     let dataComponentsArr = [];
-
- //     components.forEach(el => {
- //         if(el.getAttribute("data-component") == "Accordion"){
- //             const AccordionComponent = new Accordion(el);
- //             AccordionComponent.init();
- //         }
- //         if(el.getAttribute("data-component") == "Slider"){
- //             const SliderComponent = new Slider(el);
- //             SliderComponent.init();
- //         }
- //     })
- // }
-
+ 
 
 
  // https://github.com/AbrakaDaba/accordion/tree/html_ready
